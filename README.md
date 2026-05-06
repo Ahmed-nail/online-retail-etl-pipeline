@@ -59,7 +59,7 @@ etl-project/
 ├── .gitignore
 ├── README.md
 └── docker-compose.yaml
-
+```
 ---
 
 ## Pipeline Architecture
