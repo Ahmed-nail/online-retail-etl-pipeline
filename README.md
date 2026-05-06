@@ -43,8 +43,6 @@ etl-project/
 │   ├── batches/
 │   ├── data.csv
 │
-│
-│
 ├── docs/
 │   ├── architecture_diagram.png
 │   ├── dwh_schema.png
