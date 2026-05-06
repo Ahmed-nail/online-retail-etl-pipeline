@@ -37,26 +37,28 @@ The final warehouse follows a star schema design to support analytics and busine
 etl-project/
 │
 ├── dags/
-│   └── etl-dag.py
+│   ├── etl-dag.py
 │
 ├── data/
 │   ├── batches/
-│   ├── raw.csv
-│   └── clean.csv
+│   ├── data.csv
 │
-├── spark/
-│   └── spark_etl.py
 │
-├── sql/
-│   └── snowflake_schema.sql
 │
 ├── docs/
-│   ├── architecture.png
-│   └── dwh_schema.png
+│   ├── architecture_diagram.png
+│   ├── dwh_schema.png
 │
+├── notebooks/
+│   └── spark_hdfs.ipynb
+│
+├── scripts/
+│   ├── simulate.py
+│   └── load_to_snowflake.py
+│
+├── .gitignore
 ├── README.md
 └── docker-compose.yaml
-```
 
 ---
 
