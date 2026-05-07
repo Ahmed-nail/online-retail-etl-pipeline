@@ -17,7 +17,7 @@ The final warehouse follows a **Star Schema** design to support analytics and bu
 
 ## Architecture Diagram
 
-![Architecture](docs/architecture_diagram.png)
+![Architecture](docs/Architecture_diagram.png)
 
 ---
 
@@ -48,7 +48,8 @@ The final warehouse follows a **Star Schema** design to support analytics and bu
 etl-project/
 │
 ├── dags/
-│   └── etl_dag.py
+│   └── etl-dag.py
+|   └── etl-pipeline.py
 │
 ├── data/
 │   └── data.csv
