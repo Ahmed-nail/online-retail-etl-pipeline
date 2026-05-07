@@ -6,7 +6,7 @@ from snowflake.connector.pandas_tools import write_pandas
 # CONNECT
 conn = snowflake.connector.connect(
     user="AhmedNAil",
-    password="RsBVJjci97dEkgb",
+    password="",
     account="qhaiwqt-jd23128",
     warehouse="COMPUTE_WH",
     database="ETL_PROJECT",

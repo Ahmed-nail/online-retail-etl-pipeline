@@ -8,7 +8,7 @@ from snowflake.connector.pandas_tools import write_pandas
 
 SNOWFLAKE_CONFIG = {
     "user":      "AhmedNail",
-    "password":  "RsBVJjci97dEkgb",
+    "password":  "",
     "account":   "qhaiwqt-jd23128",
     "warehouse": "COMPUTE_WH",
     "database":  "ETL_PROJECT",
