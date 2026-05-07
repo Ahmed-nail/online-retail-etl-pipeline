@@ -201,8 +201,3 @@ ORDER BY T.YEAR, T.MONTH;
 - Loading curated analytical data into Snowflake
 
 ---
-
-## Author
-
-**Ahmed Nail**
-GitHub: [@Ahmed-nail](https://github.com/Ahmed-nail)
