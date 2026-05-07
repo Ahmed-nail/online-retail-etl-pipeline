@@ -4,48 +4,59 @@
 
 This project implements an end-to-end data engineering pipeline for processing online retail transaction data.
 
-The pipeline ingests raw batch files, performs distributed data cleaning and transformation using Apache Spark, stores intermediate and processed data in HDFS, orchestrates workflow execution with Apache Airflow, and loads curated analytical tables into Snowflake.
+The pipeline:
+- Ingests raw batch files simulating real-time data
+- Reads and validates data from HDFS using Apache Spark
+- Performs distributed data cleaning and transformation
+- Orchestrates workflow execution with Apache Airflow
+- Loads curated analytical tables into Snowflake
 
-The final warehouse follows a star schema design to support analytics and business intelligence workloads.
+The final warehouse follows a **Star Schema** design to support analytics and business intelligence workloads.
 
 ---
 
-## Objectives
+## Architecture Diagram
 
-* Build a reproducible ETL pipeline
-* Process retail transaction data at scale
-* Use distributed storage and distributed computation
-* Load clean analytical data into a cloud data warehouse
-* Orchestrate the workflow using Airflow
+![Architecture](docs/architecture_diagram.png)
+
+---
+
+## DWH Schema
+
+![DWH Schema](docs/dwh_schema.png)
 
 ---
 
 ## Tech Stack
 
-* **Apache Airflow** — workflow orchestration
-* **Apache Spark (PySpark)** — distributed data processing
-* **HDFS** — distributed storage
-* **YARN** — cluster resource management
-* **Snowflake** — cloud data warehouse
-* **Docker Compose** — local containerized environment
+| Tool | Purpose |
+|------|---------|
+| Apache Airflow | Workflow orchestration |
+| Apache Spark (PySpark) | Distributed data processing |
+| HDFS | Distributed file storage |
+| YARN | Cluster resource management |
+| Snowflake | Cloud Data Warehouse |
+| Docker Compose | Local containerized environment |
+| Python | Pipeline scripting |
+| Pandas | Batch simulation & lightweight preprocessing |
 
 ---
 
 ## Project Structure
 
-```text
+```
 etl-project/
 │
 ├── dags/
-│   ├── etl-dag.py
+│   └── etl_dag.py
 │
 ├── data/
-│   ├── batches/
-│   ├── data.csv
+│   └── data.csv
+|   └── batshes/
 │
 ├── docs/
 │   ├── architecture_diagram.png
-│   ├── dwh_schema.png
+│   └── dwh_schema.png
 │
 ├── notebooks/
 │   └── spark_hdfs.ipynb
@@ -58,111 +69,93 @@ etl-project/
 ├── README.md
 └── docker-compose.yaml
 ```
+
 ---
 
-## Pipeline Architecture
+##  Pipeline Architecture
 
-### Flow
+```
+CSV Data → Simulation Script → HDFS → Spark → Airflow DAG → Snowflake
+```
 
-Raw batch files are placed inside the `data/batches` directory.
+### Airflow DAG Tasks
 
-Airflow orchestrates the pipeline in three stages:
+```
+spark_extract → extract → transform → load
+```
 
-### 1. Extract
-
-* Batch CSV files are collected
-* Raw records are merged into a single dataset
-
-### 2. Transform
-
-Spark reads the raw data from HDFS and performs:
-
-* null value removal
-* invalid quantity filtering
-* invalid price filtering
-* schema normalization
-* star schema transformation
-
-### 3. Load
-
-Processed tables are loaded into Snowflake.
+| Task | Description |
+|------|-------------|
+| `spark_extract` | Reads batch files from HDFS using Apache Spark |
+| `extract` | Merges all batch CSV files into one dataset |
+| `transform` | Cleans and normalizes the data |
+| `load` | Loads Star Schema tables into Snowflake |
 
 ---
 
 ## Data Warehouse Design
 
-The project uses a **star schema**.
-
-### Fact Table
-
-* `FACT_SALES`
-
-### Dimension Tables
-
-* `CUSTOMERS`
-* `PRODUCTS`
-* `TIME_DIM`
-
-This design improves analytical query performance and keeps fact and dimension data separated.
-
----
-
-## Airflow DAG
-
-The pipeline contains the following tasks:
-
-* `extract`
-* `spark_transform`
-* `load`
-
-Execution order:
-
-```text
-extract → spark_transform → load
+```
+CUSTOMERS ──────►┐
+                 │
+PRODUCTS  ──────►├──► FACT_SALES
+                 │
+TIME_DIM  ──────►┘
 ```
 
+### Fact Table
+- `FACT_SALES` (ORDER_ID, CUSTOMER_ID FK, PRODUCT_ID FK, DATE FK, QUANTITY, PRICE)
+
+### Dimension Tables
+- `CUSTOMERS` (CUSTOMER_ID PK, COUNTRY)
+- `PRODUCTS` (PRODUCT_ID PK, PRODUCT_NAME)
+- `TIME_DIM` (DATE PK, DAY, MONTH, YEAR)
+
 ---
 
-## Running the Project
+## Snowflake Configuration
 
-### Start services
+| Setting | Value |
+|---------|-------|
+| Database | ETL_PROJECT |
+| Schema | STAR_SCHEMA |
+| Warehouse | COMPUTE_WH |
 
+---
+
+## How to Run
+
+### 1. Start all services
 ```bash
 docker compose up -d
 ```
 
-### Open Airflow
-
-```text
-http://localhost:18080
+### 2. Simulate real-time data
+```bash
+python scripts/simulate.py
 ```
 
-### Open Spark Jupyter
+### 3. Upload batches to HDFS
+```bash
+docker exec hadoop-namenode hdfs dfs -mkdir -p /user/airflow/data/batches
+docker cp ./data/batches hadoop-namenode:/tmp/batches
+docker exec hadoop-namenode hdfs dfs -put /tmp/batches /user/airflow/data/
+```
 
-```text
+### 4. Open Airflow and trigger the DAG
+```
+http://localhost:18080
+DAG: etl_pipeline → Trigger
+```
+
+### 5. Open Jupyter (Spark)
+```
 http://localhost:8899
 ```
 
----
-
-## HDFS Data Upload
-
-Create HDFS directory:
-
-```bash
-docker exec hadoop-namenode hdfs dfs -mkdir -p /user/airflow/data/batches
+### 6. Open Hadoop UI
 ```
-
-Copy local batches:
-
-```bash
-docker cp ./data/batches hadoop-namenode:/tmp/batches
-```
-
-Upload to HDFS:
-
-```bash
-docker exec hadoop-namenode hdfs dfs -put /tmp/batches /user/airflow/data/
+http://localhost:9870
 ```
 
 ---
@@ -170,30 +163,46 @@ docker exec hadoop-namenode hdfs dfs -put /tmp/batches /user/airflow/data/
 ## Output Validation
 
 The pipeline was validated by:
+- Successful Airflow DAG execution
+- Spark logs showing rows read from HDFS
+- Snowflake tables loaded correctly
 
-* successful Airflow DAG execution
-* Spark logs
-* HDFS generated output files
-* Snowflake table loading
-* SQL validation queries
-
-Example validation query:
+### Example validation queries
 
 ```sql
-SELECT COUNT(*) FROM FACT_SALES;
+-- Total rows loaded
+SELECT COUNT(*) FROM ETL_PROJECT.STAR_SCHEMA.FACT_SALES;
+
+-- Top 5 countries by revenue
+SELECT C.COUNTRY, SUM(F.QUANTITY * F.PRICE) AS REVENUE
+FROM FACT_SALES F
+JOIN CUSTOMERS C ON F.CUSTOMER_ID = C.CUSTOMER_ID
+GROUP BY C.COUNTRY
+ORDER BY REVENUE DESC
+LIMIT 5;
+
+-- Monthly revenue
+SELECT T.MONTH, T.YEAR, SUM(F.QUANTITY * F.PRICE) AS MONTHLY_REVENUE
+FROM FACT_SALES F
+JOIN TIME_DIM T ON F.DATE = T.DATE
+GROUP BY T.YEAR, T.MONTH
+ORDER BY T.YEAR, T.MONTH;
 ```
 
 ---
 
 ## Key Learning Outcomes
 
-This project demonstrates:
+- ETL orchestration with Airflow
+- Distributed storage with HDFS
+- Distributed processing with Spark
+- YARN-based resource management
+- Dimensional modeling (Star Schema)
+- Loading curated analytical data into Snowflake
 
-* ETL orchestration with Airflow
-* distributed storage with HDFS
-* distributed processing with Spark
-* YARN-based resource management
-* dimensional modeling
-* loading curated analytical data into Snowflake
+---
 
+## Author
 
+**Ahmed Nail**
+GitHub: [@Ahmed-nail](https://github.com/Ahmed-nail)
