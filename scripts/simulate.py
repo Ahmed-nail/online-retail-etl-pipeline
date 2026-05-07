@@ -2,9 +2,7 @@ import pandas as pd
 import os
 import time
 
-# ========================================
 # Script Configuration
-# ========================================
 INPUT_FILE = r"C:\Users\ahmed\Desktop\etl-project\data\data.csv"
 OUTPUT_DIR = r"C:\Users\ahmed\Desktop\etl-project\data\batches"
 BATCH_SIZE = 500
