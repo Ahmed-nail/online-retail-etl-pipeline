@@ -18,26 +18,6 @@ SNOWFLAKE_CONFIG = {
 BATCH_DIR  = "/opt/airflow/data/batches"
 HDFS_PATH  = "hdfs://hadoop-namenode:9000/user/airflow/data/batches/"
 
-def spark_extract():
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder \
-        .appName("OnlineRetailETL") \
-        .master("local[*]") \
-        .config("spark.hadoop.fs.defaultFS", "hdfs://hadoop-namenode:9000") \
-        .getOrCreate()
-
-    df = spark.read.csv(
-        HDFS_PATH,
-        header=True,
-        inferSchema=True
-    )
-
-    count = df.count()
-    print(f"read spark {count:,} rows from HDFS")
-    df.printSchema()
-    spark.stop()
-
 def extract():
     files = sorted(os.listdir(BATCH_DIR))[:50]
     all_data = []
@@ -100,9 +80,8 @@ with DAG(
     catchup=False
 ) as dag:
 
-    t0 = PythonOperator(task_id="spark_extract", python_callable=spark_extract)
     t1 = PythonOperator(task_id="extract",       python_callable=extract)
     t2 = PythonOperator(task_id="transform",     python_callable=transform)
     t3 = PythonOperator(task_id="load",          python_callable=load)
 
-    t0 >> t1 >> t2 >> t3
+    t1 >> t2 >> t3
