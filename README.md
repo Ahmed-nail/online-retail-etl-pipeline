@@ -82,12 +82,11 @@ CSV Data → Simulation Script → HDFS → Spark → Airflow DAG → Snowflake
 ### Airflow DAG Tasks
 
 ```
-spark_extract → extract → transform → load
+extract → transform → load
 ```
 
 | Task | Description |
 |------|-------------|
-| `spark_extract` | Reads batch files from HDFS using Apache Spark |
 | `extract` | Merges all batch CSV files into one dataset |
 | `transform` | Cleans and normalizes the data |
 | `load` | Loads Star Schema tables into Snowflake |
